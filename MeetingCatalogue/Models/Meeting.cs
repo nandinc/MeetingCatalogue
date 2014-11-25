@@ -9,6 +9,7 @@ namespace MeetingCatalogue.Models
 {
     public class Meeting
     {
+        // teszt comment
         [DatabaseGenerated(DatabaseGeneratedOption.Identity), Key]
         public int ID { get; set; }
         public ApplicationUser Owner { get; set; }
