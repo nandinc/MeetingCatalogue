@@ -50,11 +50,11 @@ namespace MeetingCatalogue
             //   appId: "",
             //   appSecret: "");
 
-            //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
-            //{
-            //    ClientId = "",
-            //    ClientSecret = ""
-            //});
+            app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
+            {
+                ClientId = "337607093700-ic4u29lqpb0k2d8qq5ir7bsj3firs294.apps.googleusercontent.com",
+                ClientSecret = "_WyVMmBo12yI17g-hLeYKKhV"
+            });
         }
     }
 }
