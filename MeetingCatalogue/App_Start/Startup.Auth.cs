@@ -46,9 +46,9 @@ namespace MeetingCatalogue
             //   consumerKey: "",
             //   consumerSecret: "");
 
-            //app.UseFacebookAuthentication(
-            //   appId: "",
-            //   appSecret: "");
+            app.UseFacebookAuthentication(
+               appId: "308062842737334",
+               appSecret: "e77056937623984e5535c9c25dc0e48a");
 
             app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
             {
