@@ -9,13 +9,13 @@ namespace MeetingCatalogue.Models
 {
     public class Meeting
     {
-        // teszt comment
         [DatabaseGenerated(DatabaseGeneratedOption.Identity), Key]
         public int ID { get; set; }
         public ApplicationUser Owner { get; set; }
         public DateTime From { get; set; }
         public DateTime To { get; set; }
         public string Location { get; set; }
+        public string Title { get; set; }
         public string Agenda { get; set; }
         public string Summary { get; set; }
         public DateTime CreatedOn { get; set; }
@@ -25,6 +25,27 @@ namespace MeetingCatalogue.Models
         public Meeting() : base()
         {
             this.Participants = new HashSet<ApplicationUser>();
-        } 
+        }
+
+        public bool CanView(ApplicationUser user)
+        {
+            return Participants.Contains(user);
+        }
+
+        public bool CanEdit(ApplicationUser user)
+        {
+            // We could also allow admin users
+            return user.Equals(Owner);
+        }
+
+        public bool CanAddSummary(ApplicationUser user)
+        {
+            return CanView(user);
+        }
+
+        public bool CanDelete(ApplicationUser user)
+        {
+            return user.Equals(Owner) && Participants.Count == 0;
+        }
     }
 }

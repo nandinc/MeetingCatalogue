@@ -27,6 +27,11 @@ namespace MeetingCatalogue.Models
             // Add custom user claims here
             return userIdentity;
         }
+
+        public bool Equals(ApplicationUser user)
+        {
+            return this.Id == user.Id;
+        }
     }
 
     //public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
