@@ -16,5 +16,19 @@ namespace MeetingCatalogue.DAL
             : base("DefaultConnection")
         {
         }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Meeting>()
+                .HasMany(m => m.Participants)
+                .WithMany(u => u.Meetings);
+        }
+
+        public static MeetingCatalogueContext Create()
+        {
+            return new MeetingCatalogueContext();
+        }
     }
 }
