@@ -47,29 +47,20 @@
         <dd>
             @Html.DisplayFor(model => model.Location)
         </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Agenda)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Agenda)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.Summary)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Summary)
-        </dd>
-
     </dl>
 </div>
 
 <h4>@Html.DisplayNameFor(model => model.Agenda)</h4>
 <div class="row">
-    @Html.DisplayFor(model => model.Agenda)
+    @if (Model.Agenda.IsEmpty())
+    {
+        <p>No agenda yet.</p>
+    }
+    else
+    {
+        @Html.Raw(@Model.Agenda)
+        @*@Html.DisplayFor(model => model.Agenda)*@
+    }
 </div>
 
 <h4>@Html.DisplayNameFor(model => model.Summary)</h4>
@@ -80,7 +71,8 @@
     }
     else
     {
-        @Html.DisplayFor(model => model.Summary)
+        @Html.Raw(@Model.Summary)
+        @*@Html.DisplayFor(model => model.Summary)*@
     }
 </div>
 

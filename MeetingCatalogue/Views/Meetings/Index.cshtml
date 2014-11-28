@@ -24,11 +24,14 @@
             @Html.DisplayNameFor(model => model.Location)
         </th>
         <th>
+            @Html.DisplayNameFor(model => model.Participants)
+        </th>
+        @*<th>
             @Html.DisplayNameFor(model => model.Agenda)
         </th>
         <th>
             @Html.DisplayNameFor(model => model.Summary)
-        </th>
+        </th>*@
         <th></th>
     </tr>
 
@@ -46,12 +49,13 @@
         <td>
             @Html.DisplayFor(modelItem => item.Location)
         </td>
-        <td>
+        <td>@item.Participants.Count</td>
+        @*<td>
             @Html.DisplayFor(modelItem => item.Agenda)
         </td>
         <td>
             @Html.DisplayFor(modelItem => item.Summary)
-        </td>
+        </td>*@
         <td>
             @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
             @Html.ActionLink("Details", "Details", new { id=item.ID }) |

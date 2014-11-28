@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 using System.ComponentModel.DataAnnotations;
+using System.Web.Mvc;
 
 namespace MeetingCatalogue.Models
 {
@@ -16,7 +17,9 @@ namespace MeetingCatalogue.Models
         public DateTime To { get; set; }
         public string Location { get; set; }
         public string Title { get; set; }
+        [DataType(DataType.MultilineText), AllowHtml]
         public string Agenda { get; set; }
+        [DataType(DataType.MultilineText), AllowHtml]
         public string Summary { get; set; }
         public DateTime CreatedOn { get; set; }
 

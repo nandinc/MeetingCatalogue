@@ -11,6 +11,7 @@ using MeetingCatalogue.Models;
 using System.Web.Security;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Security.Application;
 
 namespace MeetingCatalogue.Controllers
 {
@@ -75,6 +76,8 @@ namespace MeetingCatalogue.Controllers
             meeting.Owner = CurrentUser;
             meeting.CreatedOn = DateTime.Now;
             meeting.Participants.Add(meeting.Owner);
+            meeting.Agenda = Sanitizer.GetSafeHtmlFragment(meeting.Agenda);
+            meeting.Summary = Sanitizer.GetSafeHtmlFragment(meeting.Summary);
             
             if (ModelState.IsValid)
             {
@@ -130,8 +133,8 @@ namespace MeetingCatalogue.Controllers
             meeting.From = oldMeeting.From;
             meeting.To = oldMeeting.To;
             meeting.Location = oldMeeting.Location;
-            meeting.Agenda = oldMeeting.Agenda;
-            meeting.Summary = oldMeeting.Summary;
+            meeting.Agenda = Sanitizer.GetSafeHtmlFragment(oldMeeting.Agenda);
+            meeting.Summary = Sanitizer.GetSafeHtmlFragment(oldMeeting.Summary);
 
             // TODO: Update participants
 
