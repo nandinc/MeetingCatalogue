@@ -112,16 +112,32 @@ namespace MeetingCatalogue.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,From,To,Location,Title,Agenda,Summary")] Meeting meeting)
+        public ActionResult Edit([Bind(Include = "ID,From,To,Location,Title,Agenda,Summary")] Meeting oldMeeting)
         {
+            var meeting = db.Meetings.Find(oldMeeting.ID);
+            if (meeting == null)
+            {
+                return HttpNotFound();
+            }
+
             if (!meeting.CanEdit(CurrentUser))
             {
                 return new HttpUnauthorizedResult();
             }
 
+            // Update meeting data
+            meeting.Title = oldMeeting.Title;
+            meeting.From = oldMeeting.From;
+            meeting.To = oldMeeting.To;
+            meeting.Location = oldMeeting.Location;
+            meeting.Agenda = oldMeeting.Agenda;
+            meeting.Summary = oldMeeting.Summary;
+
+            // TODO: Update participants
+
             if (ModelState.IsValid)
             {
-                db.Entry(meeting).State = EntityState.Modified;
+                //db.Entry(meeting).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
