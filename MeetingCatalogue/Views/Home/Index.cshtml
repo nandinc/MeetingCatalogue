@@ -1,5 +1,7 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+﻿@model MeetingCatalogue.ViewModels.DashboardViewModel
+
+@{
+    ViewBag.Title = "Dashboard";
 }
 
 @*<div class="jumbotron">
@@ -15,16 +17,28 @@
     <h1>Dashboard</h1>
     <div class="col-md-4">
         <h2>Upcoming meetings</h2>
+        @foreach (var meeting in Model.Upcoming)
+        {
+            @Html.Partial("~/Views/Home/_Meeting.cshtml", meeting)
+        }
     </div>
     <div class="col-md-4">
         <h2>Recent meetings</h2>
+        @foreach (var meeting in Model.Recent)
+        {
+            @Html.Partial("~/Views/Home/_Meeting.cshtml", meeting)
+        }
     </div>
     <div class="col-md-4">
-        <h2>My meetings</h2>
+        <h2>Owned meetings</h2>
+        @foreach (var meeting in Model.Owned)
+        {
+            @Html.Partial("~/Views/Home/_Meeting.cshtml", meeting)
+        }
     </div>
 </div>
 
-<div class="row">
+@*<div class="row">
     <div class="col-md-4">
         <h2>Getting started</h2>
         <p>
@@ -44,4 +58,4 @@
         <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
         <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
     </div>
-</div>
+</div>*@

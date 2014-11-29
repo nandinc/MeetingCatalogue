@@ -34,7 +34,6 @@ namespace MeetingCatalogue.Controllers
             {
                 if (currentUser == null)
                 {
-                    //var userManager = HttpContext.GetOwinContext().GetUserManager<ApplicationUserManager>();
                     var userId = User.Identity.GetUserId();
                     currentUser = db.Users.Find(userId);
                 }

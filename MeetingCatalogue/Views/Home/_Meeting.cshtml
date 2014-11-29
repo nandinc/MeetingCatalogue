@@ -1,0 +1,36 @@
+﻿@model MeetingCatalogue.Models.Meeting
+
+<a href="@Url.Action("Details", "Meetings", new { id = Model.ID })" class="meeting-widget btn btn-default">
+    <strong class="meeting-title">@Model.Title</strong>
+    @if (Model.From.Value.Date == Model.To.Value.Date)
+    {
+        <span class="meeting-date">@Model.From.Value.ToString("yyyy-MM-dd HH:mm") - @Model.To.Value.ToString("HH:mm")</span>
+    }
+    else
+    {
+        <span class="meeting-date">@Model.From.Value.ToString("yyyy-MM-dd HH:mm") - @Model.To.Value.ToString("yyyy-MM-dd HH:mm")</span>
+    }
+    @if (!Model.Location.IsEmpty())
+    {
+        <span class="meeting-location">@Model.Location</span>
+    }
+    <span class="meeting-participants">
+        @{
+            var count = Model.Participants.Count;
+            var participants = "";
+            if (count >= 1)
+            {
+                participants += Model.Participants.First().UserName;
+            }
+            if (count >= 2)
+            {
+                participants += ", " + Model.Participants.Skip(1).Take(1).First().UserName;
+            }
+            if (count > 2)
+            {
+                participants += " and " + (count - 2) + " others";
+            }
+        }
+        @participants
+    </span>
+</a>

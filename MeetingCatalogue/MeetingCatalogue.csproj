@@ -252,6 +252,7 @@
     <Compile Include="Startup.cs" />
     <Compile Include="Utilities\CreateCalendarEvent.cs" />
     <Compile Include="Utilities\DocXTemplate.cs" />
+    <Compile Include="ViewModels\DashboardViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-datetimepicker.min.css" />
@@ -327,8 +328,7 @@
     <Content Include="Views\Meetings\Edit.cshtml" />
     <Content Include="Views\Meetings\Index.cshtml" />
     <Content Include="Utilities\client_secrets.json" />
-    <Content Include="Views\Meetings\_Form.cshtml" />
-    <Content Include="Views\Meetings\_FormScripts.cshtml" />
+    <Content Include="Views\Home\_Meeting.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

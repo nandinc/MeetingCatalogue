@@ -12,6 +12,7 @@ namespace MeetingCatalogue.Models
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity), Key]
         public int ID { get; set; }
+        [Display(Name="Organizer")]
         public ApplicationUser Owner { get; set; }
         [Required]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm}", ApplyFormatInEditMode = true)]
