@@ -11,12 +11,20 @@ using MeetingCatalogue.Models;
 using System.Web.Security;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
+using Microsoft.Security.Application;
 
 namespace MeetingCatalogue.Controllers
 {
     [Authorize]
     public class MeetingsController : Controller
     {
+        private class Participant
+        {
+            public string id { get; set; }
+            public string text { get; set; }
+            public bool locked { get; set; }
+        }
+        
         private MeetingCatalogueContext db = new MeetingCatalogueContext();
 
         private ApplicationUser currentUser;
@@ -75,6 +83,8 @@ namespace MeetingCatalogue.Controllers
             meeting.Owner = CurrentUser;
             meeting.CreatedOn = DateTime.Now;
             meeting.Participants.Add(meeting.Owner);
+            meeting.Agenda = Sanitizer.GetSafeHtmlFragment(meeting.Agenda);
+            meeting.Summary = Sanitizer.GetSafeHtmlFragment(meeting.Summary);
             
             if (ModelState.IsValid)
             {
@@ -112,16 +122,55 @@ namespace MeetingCatalogue.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,From,To,Location,Title,Agenda,Summary")] Meeting meeting)
+        public ActionResult Edit([Bind(Include = "ID,From,To,Location,Title,Agenda,Summary")] Meeting newMeeting, string Participants)
         {
+            var users = System.Web.Helpers.Json.Decode<ICollection<Participant>>(Participants);
+            if (users == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            
+            var meeting = db.Meetings.Find(newMeeting.ID);
+            if (meeting == null)
+            {
+                return HttpNotFound();
+            }
+
             if (!meeting.CanEdit(CurrentUser))
             {
                 return new HttpUnauthorizedResult();
             }
 
+            // Update meeting data
+            meeting.Title = newMeeting.Title;
+            meeting.From = newMeeting.From;
+            meeting.To = newMeeting.To;
+            meeting.Location = newMeeting.Location;
+            meeting.Agenda = Sanitizer.GetSafeHtmlFragment(newMeeting.Agenda);
+            meeting.Summary = Sanitizer.GetSafeHtmlFragment(newMeeting.Summary);
+            
+            // Update participants
+            var newUsers = users.Select(u => db.Users.Find(u.id));
+
+            var participants = meeting.Participants.ToList();
+            var ids = new HashSet<string>(users.Select(u => u.id));
+            var keptParticipants = participants.Where(u => ids.Contains(u.Id));
+            var removedParticipants = participants.Where(u => !(ids.Contains(u.Id)));
+            var addedParticipants = users.Select(u => db.Users.Find(u.id)).Except(keptParticipants);
+
+            foreach (var user in removedParticipants)
+            {
+                meeting.Participants.Remove(user);
+            }
+            
+            foreach (var user in addedParticipants)
+            {
+                meeting.Participants.Add(user);
+            }
+
             if (ModelState.IsValid)
             {
-                db.Entry(meeting).State = EntityState.Modified;
+                //db.Entry(meeting).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -208,6 +257,22 @@ namespace MeetingCatalogue.Controllers
             // TODO: Send report
 
             return View(meeting);
+        }
+
+        // POST: Meetings/SearchParticipants?q=Username
+        [HttpPost]
+        public ActionResult SearchParticipants(string q)
+        {
+            var users = from user in db.Users
+                        where user.UserName.StartsWith(q) || user.Email.StartsWith(q)
+                        orderby user.UserName
+                        select new
+                        {
+                            id = user.Id,
+                            text = user.UserName,
+                        };
+
+            return Json(users);
         }
 
         protected override void Dispose(bool disposing)

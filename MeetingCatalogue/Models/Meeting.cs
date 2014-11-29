@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 using System.ComponentModel.DataAnnotations;
+using System.Web.Mvc;
 
 namespace MeetingCatalogue.Models
 {
@@ -12,11 +13,18 @@ namespace MeetingCatalogue.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity), Key]
         public int ID { get; set; }
         public ApplicationUser Owner { get; set; }
+        [Required]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime From { get; set; }
+        [Required]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime To { get; set; }
         public string Location { get; set; }
+        [Required]
         public string Title { get; set; }
+        [DataType(DataType.MultilineText), AllowHtml]
         public string Agenda { get; set; }
+        [DataType(DataType.MultilineText), AllowHtml]
         public string Summary { get; set; }
         public DateTime CreatedOn { get; set; }
 
@@ -45,7 +53,7 @@ namespace MeetingCatalogue.Models
 
         public bool CanDelete(ApplicationUser user)
         {
-            return user.Equals(Owner) && Participants.Count == 0;
+            return user.Equals(Owner);
         }
     }
 }
