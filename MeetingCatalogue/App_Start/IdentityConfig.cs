@@ -68,7 +68,6 @@ namespace MeetingCatalogue
             await configSendGridasync(message);
         }
 
-        // Use NuGet to install SendGrid (Basic C# client lib) 
         private async Task configSendGridasync(IdentityMessage message)
         {
             var myMessage = new SendGridMessage();
@@ -87,7 +86,7 @@ namespace MeetingCatalogue
             // Create a Web transport for sending email.
             var transportWeb = new Web(credentials);
 
-            // Send the email.
+            // Send the email
             if (transportWeb != null)
             {
                 await transportWeb.DeliverAsync(myMessage);
