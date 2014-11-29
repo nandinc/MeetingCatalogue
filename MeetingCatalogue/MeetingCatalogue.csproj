@@ -252,7 +252,7 @@
     <Compile Include="Startup.cs" />
     <Compile Include="Utilities\CreateCalendarEvent.cs" />
     <Compile Include="Utilities\DocXTemplate.cs" />
-    <Compile Include="Utilities\SendEmail.cs" />
+    <Compile Include="ViewModels\DashboardViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-datetimepicker.min.css" />
@@ -262,6 +262,8 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\flatly.bootstrap.css" />
     <Content Include="Content\flatly.bootstrap.min.css" />
+    <Content Include="Content\select2-bootstrap.css" />
+    <Content Include="Content\select2.css" />
     <Content Include="Content\select2.png" />
     <Content Include="Content\select2x2.png" />
     <Content Include="favicon.ico" />
@@ -292,6 +294,7 @@
     <Content Include="Scripts\respond.matchmedia.addListener.js" />
     <Content Include="Scripts\respond.matchmedia.addListener.min.js" />
     <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\select2.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -328,8 +331,7 @@
     <Content Include="Views\Meetings\Edit.cshtml" />
     <Content Include="Views\Meetings\Index.cshtml" />
     <Content Include="Utilities\client_secrets.json" />
-    <Content Include="Views\Meetings\_Form.cshtml" />
-    <Content Include="Views\Meetings\_FormScripts.cshtml" />
+    <Content Include="Views\Home\_Meeting.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

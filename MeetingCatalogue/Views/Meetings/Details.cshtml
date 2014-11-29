@@ -9,14 +9,6 @@
 <div>
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-
-        <dt>
             @Html.DisplayNameFor(model => model.Owner)
         </dt>
 
@@ -47,34 +39,42 @@
         <dd>
             @Html.DisplayFor(model => model.Location)
         </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.Participants)
+        </dt>
+        <dd>
+            <ul class="list-unstyled">
+                @foreach (var user in Model.Participants)
+                {
+                    <li>@user.UserName</li>
+                }
+            </ul>
+        </dd>
     </dl>
 </div>
 
 <h4>@Html.DisplayNameFor(model => model.Agenda)</h4>
-<div class="row">
-    @if (Model.Agenda.IsEmpty())
-    {
-        <p>No agenda yet.</p>
-    }
-    else
-    {
-        @Html.Raw(@Model.Agenda)
-        @*@Html.DisplayFor(model => model.Agenda)*@
-    }
-</div>
+@if (Model.Agenda.IsEmpty())
+{
+    <p><em>No agenda yet.</em></p>
+}
+else
+{
+    @Html.Raw(@Model.Agenda)
+    @*@Html.DisplayFor(model => model.Agenda)*@
+}
 
 <h4>@Html.DisplayNameFor(model => model.Summary)</h4>
-<div class="row">
-    @if (Model.Summary.IsEmpty())
-    {
-        <p>No summary yet.</p>
-    }
-    else
-    {
-        @Html.Raw(@Model.Summary)
-        @*@Html.DisplayFor(model => model.Summary)*@
-    }
-</div>
+@if (Model.Summary.IsEmpty())
+{
+    <p><em>No summary yet.</em></p>
+}
+else
+{
+    @Html.Raw(@Model.Summary)
+    @*@Html.DisplayFor(model => model.Summary)*@
+}
 
 <p>
     <a href="@Url.Action("Index", "Meetings")" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to List</a>
@@ -82,6 +82,7 @@
 
     @*<div class="btn-group-vertical" role="group">*@
         <a href="@Url.Action("Edit", "Meetings", new { id = Model.ID })" class="btn btn-primary"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+        <a href="@Url.Action("Delete", "Meetings", new { id = Model.ID })" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete</a>
         @* Delete *@
     @*</div>*@
     @*@Html.ActionLink("<span class=\"glyphicon glyphicon-edit\"></span> Edit", "Edit", new { id = Model.ID }, new { @class = "btn btn-default" }) |*@

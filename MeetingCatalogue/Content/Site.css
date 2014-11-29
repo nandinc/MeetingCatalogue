@@ -20,3 +20,34 @@ textarea {
 .select2-container-multi {
     width: 100%;
 }
+
+.meeting-widget {
+    display: block;
+    max-width: 300px;
+    text-align: left;
+    overflow: auto;
+    margin-bottom: 16px;
+}
+
+.meeting-widget .meeting-title {
+    display: block;
+    font-weight: bold;
+}
+
+.meeting-widget .meeting-date {
+    display: block;
+    float: left;
+}
+
+.meeting-widget .meeting-location {
+    display: block;
+    float: right;
+    font-style: italic;
+    padding-left: 10px;
+}
+
+.meeting-widget .meeting-participants {
+    display: block;
+    clear: both;
+    font-size: 90%;
+}
