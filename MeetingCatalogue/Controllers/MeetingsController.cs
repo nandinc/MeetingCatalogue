@@ -70,7 +70,14 @@ namespace MeetingCatalogue.Controllers
         // GET: Meetings/Create
         public ActionResult Create()
         {
-            return View();
+            var meeting = new Meeting()
+            {
+                Owner = CurrentUser,
+                CreatedOn = DateTime.Now,
+            };
+            meeting.Participants.Add(meeting.Owner);
+            
+            return View(meeting);
         }
 
         // POST: Meetings/Create
@@ -78,13 +85,15 @@ namespace MeetingCatalogue.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "From,To,Location,Title,Agenda,Summary,CreatedOn")] Meeting meeting)
+        public ActionResult Create([Bind(Include = "From,To,Location,Title,Agenda,Summary")] Meeting newMeeting, string Participants)
         {
-            meeting.Owner = CurrentUser;
-            meeting.CreatedOn = DateTime.Now;
-            meeting.Participants.Add(meeting.Owner);
-            meeting.Agenda = Sanitizer.GetSafeHtmlFragment(meeting.Agenda);
-            meeting.Summary = Sanitizer.GetSafeHtmlFragment(meeting.Summary);
+            var meeting = new Meeting()
+            {
+                Owner = CurrentUser,
+                CreatedOn = DateTime.Now,
+            };
+
+            updateMeeting(meeting, newMeeting, Participants, true);
             
             if (ModelState.IsValid)
             {
@@ -124,12 +133,6 @@ namespace MeetingCatalogue.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include = "ID,From,To,Location,Title,Agenda,Summary")] Meeting newMeeting, string Participants)
         {
-            var users = System.Web.Helpers.Json.Decode<ICollection<Participant>>(Participants);
-            if (users == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            
             var meeting = db.Meetings.Find(newMeeting.ID);
             if (meeting == null)
             {
@@ -141,32 +144,7 @@ namespace MeetingCatalogue.Controllers
                 return new HttpUnauthorizedResult();
             }
 
-            // Update meeting data
-            meeting.Title = newMeeting.Title;
-            meeting.From = newMeeting.From;
-            meeting.To = newMeeting.To;
-            meeting.Location = newMeeting.Location;
-            meeting.Agenda = Sanitizer.GetSafeHtmlFragment(newMeeting.Agenda);
-            meeting.Summary = Sanitizer.GetSafeHtmlFragment(newMeeting.Summary);
-            
-            // Update participants
-            var newUsers = users.Select(u => db.Users.Find(u.id));
-
-            var participants = meeting.Participants.ToList();
-            var ids = new HashSet<string>(users.Select(u => u.id));
-            var keptParticipants = participants.Where(u => ids.Contains(u.Id));
-            var removedParticipants = participants.Where(u => !(ids.Contains(u.Id)));
-            var addedParticipants = users.Select(u => db.Users.Find(u.id)).Except(keptParticipants);
-
-            foreach (var user in removedParticipants)
-            {
-                meeting.Participants.Remove(user);
-            }
-            
-            foreach (var user in addedParticipants)
-            {
-                meeting.Participants.Add(user);
-            }
+            updateMeeting(meeting, newMeeting, Participants, false);
 
             if (ModelState.IsValid)
             {
@@ -273,6 +251,45 @@ namespace MeetingCatalogue.Controllers
                         };
 
             return Json(users);
+        }
+
+        private void updateMeeting(Meeting meeting, Meeting newMeeting, string userData, bool isNew)
+        {
+            // Parse user data
+            var users = System.Web.Helpers.Json.Decode<ICollection<Participant>>(userData);
+            if (users == null)
+            {
+                throw new HttpException(400, "Bad Request");
+            }
+
+            // Update meeting data
+            meeting.Title = newMeeting.Title;
+            meeting.From = newMeeting.From;
+            meeting.To = newMeeting.To;
+            meeting.Location = newMeeting.Location;
+            meeting.Agenda = Sanitizer.GetSafeHtmlFragment(newMeeting.Agenda);
+            meeting.Summary = Sanitizer.GetSafeHtmlFragment(newMeeting.Summary);
+
+            // Update participants
+            var newUsers = users.Select(u => db.Users.Find(u.id));
+
+            var participants = meeting.Participants.ToList();
+            var ids = new HashSet<string>(users.Select(u => u.id));
+            var keptParticipants = participants.Where(u => ids.Contains(u.Id));
+            var removedParticipants = participants.Where(u => !(ids.Contains(u.Id)));
+            var addedParticipants = users.Select(u => db.Users.Find(u.id)).Except(keptParticipants);
+
+            foreach (var user in removedParticipants)
+            {
+                meeting.Participants.Remove(user);
+            }
+
+            foreach (var user in addedParticipants)
+            {
+                meeting.Participants.Add(user);
+            }
+
+            // Send e-mail, etc.
         }
 
         protected override void Dispose(bool disposing)

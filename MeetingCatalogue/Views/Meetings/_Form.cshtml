@@ -1,0 +1,148 @@
+﻿@model MeetingCatalogue.Models.Meeting
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.ID)
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2">Time</label>
+            <div class="col-md-10">
+                <div class="input-group pull-left col-sm-3">
+                    @Html.EditorFor(model => model.From, new { htmlAttributes = new { @class = "form-control", @data_date_format = "YYYY-MM-DD HH:mm" } })
+                    <div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+                </div>
+                <div class="checkbox pull-left">&nbsp;to&nbsp;</div>
+                <div class="input-group col-sm-3">
+                    @Html.EditorFor(model => model.To, new { htmlAttributes = new { @class = "form-control", @data_date_format = "YYYY-MM-DD HH:mm" } })
+                    <div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+                </div>
+                @Html.ValidationMessageFor(model => model.From, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.To, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Location, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Location, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Location, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Participants, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="hidden" id="Participants" name="Participants" value="@Json.Encode(Model.Participants.Select(u => new { id = u.Id, text = u.UserName, locked = Model.Owner.Equals(u) }))" />
+                <input type="hidden" id="ParticipantsSelect2" value="@String.Join(",", Model.Participants.Select(u => u.Id ))" />
+                @Html.ValidationMessageFor(model => model.Participants, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Agenda, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Agenda, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Agenda, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Summary, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Summary, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Summary, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> @ViewBag.ActionLabel</button>
+                @if (ViewBag.ShowDelete)
+                {
+                    <a href="@Url.Action("Delete", "Meetings", new { id = Model.ID })" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-trash"></span> Delete</a>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+
+    <script src="//cdn.ckeditor.com/4.4.6/standard/ckeditor.js"></script>
+    <script src="//cdn.ckeditor.com/4.4.6/standard/adapters/jquery.js"></script>
+    <script type="text/javascript">
+        $('#Agenda').ckeditor();
+        $('#Summary').ckeditor();
+    </script>
+
+    @Scripts.Render("~/bundles/editjs")
+    <script type="text/javascript">
+        $("#ParticipantsSelect2").select2({
+            placeholder: 'Invite participants',
+            minimumInputLength: 3,
+            multiple: true,
+            ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
+                url: "/Meetings/SearchParticipants",
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 250,
+                data: function (term, page) {
+                    return {
+                        q: term, // search term
+                    };
+                },
+                results: function (data, page) { // parse the results into the format expected by Select2.
+                    // since we are using custom formatting functions we do not need to alter the remote JSON data
+                    return { results: data };
+                },
+                cache: true
+            },
+            initSelection: function (element, callback) {
+                var val = $('#Participants').val();
+                callback(JSON.parse(val));
+            }
+        })
+        .on('change', function(e) {
+            var data = $("#ParticipantsSelect2").select2("data");
+            console.log('Data changed: ', JSON.stringify(data));
+            $('#Participants').val(JSON.stringify(data));
+        });
+
+        (function () {
+            var $from = $('#From').datetimepicker({ sideBySide: true });
+            var $to = $('#To').datetimepicker({ sideBySide: true });
+            $from.on('dp.change', function (e) {
+                $to.data('DateTimePicker').setMinDate(e.date);
+                //$to.data('DateTimePicker').setDefaultDate(e.date);
+                if (!$to.val()) {
+                    $to.val($from.val())
+                }
+            });
+            $to.on('dp.change', function (e) {
+                $from.data('DateTimePicker').setMaxDate(e.date);
+                //$from.data('DateTimePicker').setDefaultDate(e.date);
+                if (!$from.val()) {
+                    $from.val($to.val())
+                }
+            });
+        })();
+    </script>
+}
+
+@section Styles {
+    @Styles.Render("~/Content/editcss")
+}

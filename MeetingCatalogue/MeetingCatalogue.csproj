@@ -318,6 +318,8 @@
     <Content Include="Views\Meetings\Edit.cshtml" />
     <Content Include="Views\Meetings\Index.cshtml" />
     <Content Include="Utilities\client_secrets.json" />
+    <Content Include="Views\Meetings\_Form.cshtml" />
+    <Content Include="Views\Meetings\_FormScripts.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

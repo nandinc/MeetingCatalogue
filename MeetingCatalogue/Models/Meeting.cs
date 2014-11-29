@@ -15,10 +15,10 @@ namespace MeetingCatalogue.Models
         public ApplicationUser Owner { get; set; }
         [Required]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm}", ApplyFormatInEditMode = true)]
-        public DateTime From { get; set; }
+        public DateTime? From { get; set; }
         [Required]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm}", ApplyFormatInEditMode = true)]
-        public DateTime To { get; set; }
+        public DateTime? To { get; set; }
         public string Location { get; set; }
         [Required]
         public string Title { get; set; }

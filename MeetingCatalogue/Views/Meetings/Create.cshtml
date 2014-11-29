@@ -1,13 +1,16 @@
 ﻿@model MeetingCatalogue.Models.Meeting
 
 @{
-    ViewBag.Title = "Create";
+    ViewBag.Title = "Create new meeting";
+    ViewBag.ActionLabel = "Create";
+    ViewBag.ShowDelete = false;
 }
 
-<h2>Create</h2>
+<h2>Create new meeting</h2>
 
+@Html.Partial("~/Views/Meetings/_Form.cshtml", Model)
 
-@using (Html.BeginForm()) 
+@*@using (Html.BeginForm()) 
 {
     @Html.AntiForgeryToken()
     
@@ -69,12 +72,16 @@
             </div>
         </div>
     </div>
-}
+}*@
 
 <div>
-    @Html.ActionLink("Back to List", "Index")
+    <a href="@Url.Action("Index", "Meetings")" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to list</a>
 </div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+    @Html.Partial("~/Views/Meetings/_FormScripts.cshtml", Model)
+}
+
+@section Styles {
+    @Styles.Render("~/Content/editcss")
 }

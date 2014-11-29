@@ -1,0 +1,63 @@
+﻿@Scripts.Render("~/bundles/jqueryval")
+
+<script src="//cdn.ckeditor.com/4.4.6/standard/ckeditor.js"></script>
+<script src="//cdn.ckeditor.com/4.4.6/standard/adapters/jquery.js"></script>
+<script type="text/javascript">
+        $('#Agenda').ckeditor();
+        $('#Summary').ckeditor();
+</script>
+
+@Scripts.Render("~/bundles/editjs")
+<script type="text/javascript">
+        // Participant selector
+        $("#ParticipantsSelect2").select2({
+            placeholder: 'Invite participants',
+            minimumInputLength: 3,
+            multiple: true,
+            ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
+                url: "/Meetings/SearchParticipants",
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 250,
+                data: function (term, page) {
+                    return {
+                        q: term, // search term
+                    };
+                },
+                results: function (data, page) { // parse the results into the format expected by Select2.
+                    // since we are using custom formatting functions we do not need to alter the remote JSON data
+                    return { results: data };
+                },
+                cache: true
+            },
+            initSelection: function (element, callback) {
+                var val = $('#Participants').val();
+                callback(JSON.parse(val));
+            }
+        })
+        .on('change', function(e) {
+            var data = $("#ParticipantsSelect2").select2("data");
+            console.log('Data changed: ', JSON.stringify(data));
+            $('#Participants').val(JSON.stringify(data));
+        });
+
+        // Date selector
+        (function () {
+            var $from = $('#From').datetimepicker({ sideBySide: true });
+            var from = $from.data('DateTimePicker');
+            var $to = $('#To').datetimepicker({ sideBySide: true });
+            var to = $to.data('DateTimePicker');
+            $from.on('dp.change', function (e) {
+                to.setMinDate(e.date);
+                if (e.date > to.getDate()) {
+                    to.setDate(e.date);
+                }
+            });
+            $to.on('dp.change', function (e) {
+                from.setMaxDate(e.date);
+                if (e.date < from.getDate()) {
+                    from.setDate(e.date);
+                }
+            });
+        })();
+</script>
