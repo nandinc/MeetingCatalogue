@@ -18,6 +18,13 @@ namespace MeetingCatalogue.Controllers
     [Authorize]
     public class MeetingsController : Controller
     {
+        private class Participant
+        {
+            public string id { get; set; }
+            public string text { get; set; }
+            public bool locked { get; set; }
+        }
+        
         private MeetingCatalogueContext db = new MeetingCatalogueContext();
 
         private ApplicationUser currentUser;
@@ -115,9 +122,15 @@ namespace MeetingCatalogue.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,From,To,Location,Title,Agenda,Summary")] Meeting oldMeeting)
+        public ActionResult Edit([Bind(Include = "ID,From,To,Location,Title,Agenda,Summary")] Meeting newMeeting, string Participants)
         {
-            var meeting = db.Meetings.Find(oldMeeting.ID);
+            var users = System.Web.Helpers.Json.Decode<ICollection<Participant>>(Participants);
+            if (users == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            
+            var meeting = db.Meetings.Find(newMeeting.ID);
             if (meeting == null)
             {
                 return HttpNotFound();
@@ -129,14 +142,31 @@ namespace MeetingCatalogue.Controllers
             }
 
             // Update meeting data
-            meeting.Title = oldMeeting.Title;
-            meeting.From = oldMeeting.From;
-            meeting.To = oldMeeting.To;
-            meeting.Location = oldMeeting.Location;
-            meeting.Agenda = Sanitizer.GetSafeHtmlFragment(oldMeeting.Agenda);
-            meeting.Summary = Sanitizer.GetSafeHtmlFragment(oldMeeting.Summary);
+            meeting.Title = newMeeting.Title;
+            meeting.From = newMeeting.From;
+            meeting.To = newMeeting.To;
+            meeting.Location = newMeeting.Location;
+            meeting.Agenda = Sanitizer.GetSafeHtmlFragment(newMeeting.Agenda);
+            meeting.Summary = Sanitizer.GetSafeHtmlFragment(newMeeting.Summary);
+            
+            // Update participants
+            var newUsers = users.Select(u => db.Users.Find(u.id));
 
-            // TODO: Update participants
+            var participants = meeting.Participants.ToList();
+            var ids = new HashSet<string>(users.Select(u => u.id));
+            var keptParticipants = participants.Where(u => ids.Contains(u.Id));
+            var removedParticipants = participants.Where(u => !(ids.Contains(u.Id)));
+            var addedParticipants = users.Select(u => db.Users.Find(u.id)).Except(keptParticipants);
+
+            foreach (var user in removedParticipants)
+            {
+                meeting.Participants.Remove(user);
+            }
+            
+            foreach (var user in addedParticipants)
+            {
+                meeting.Participants.Add(user);
+            }
 
             if (ModelState.IsValid)
             {
@@ -227,6 +257,22 @@ namespace MeetingCatalogue.Controllers
             // TODO: Send report
 
             return View(meeting);
+        }
+
+        // POST: Meetings/SearchParticipants?q=Username
+        [HttpPost]
+        public ActionResult SearchParticipants(string q)
+        {
+            var users = from user in db.Users
+                        where user.UserName.StartsWith(q) || user.Email.StartsWith(q)
+                        orderby user.UserName
+                        select new
+                        {
+                            id = user.Id,
+                            text = user.UserName,
+                        };
+
+            return Json(users);
         }
 
         protected override void Dispose(bool disposing)

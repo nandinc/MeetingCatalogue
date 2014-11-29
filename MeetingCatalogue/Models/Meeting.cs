@@ -13,9 +13,14 @@ namespace MeetingCatalogue.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity), Key]
         public int ID { get; set; }
         public ApplicationUser Owner { get; set; }
+        [Required]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime From { get; set; }
+        [Required]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd HH:mm}", ApplyFormatInEditMode = true)]
         public DateTime To { get; set; }
         public string Location { get; set; }
+        [Required]
         public string Title { get; set; }
         [DataType(DataType.MultilineText), AllowHtml]
         public string Agenda { get; set; }
@@ -48,7 +53,7 @@ namespace MeetingCatalogue.Models
 
         public bool CanDelete(ApplicationUser user)
         {
-            return user.Equals(Owner) && Participants.Count == 0;
+            return user.Equals(Owner);
         }
     }
 }

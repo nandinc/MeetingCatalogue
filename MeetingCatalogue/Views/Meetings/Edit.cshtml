@@ -1,7 +1,7 @@
 ﻿@model MeetingCatalogue.Models.Meeting
 
 @{
-    ViewBag.Title = "Edit";
+    ViewBag.Title = "Edit meeting";
 }
 
 <h2>Edit meeting</h2>
@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <div class="form-group">
+        @*<div class="form-group">
             @Html.LabelFor(model => model.From, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.EditorFor(model => model.From, new { htmlAttributes = new { @class = "form-control" } })
@@ -38,6 +38,38 @@
                 @Html.EditorFor(model => model.To, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.To, "", new { @class = "text-danger" })
             </div>
+        </div>*@
+
+        <div class="form-group">
+            <label class="control-label col-md-2">Time</label>
+            <div class="col-md-10">
+                @*<div class="form-inline">
+                    <div class="form-group">
+                        <div class="input-group">
+                            @Html.EditorFor(model => model.From, new { htmlAttributes = new { @class = "form-control" } })
+                            <div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+                        </div>
+                    </div>
+                    to
+                    <div class="form-group">
+                        <div class="input-group">
+                            @Html.EditorFor(model => model.To, new { htmlAttributes = new { @class = "form-control" } })
+                            <div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+                        </div>
+                    </div>
+                </div>*@
+                <div class="input-group pull-left col-sm-3">
+                    @Html.EditorFor(model => model.From, new { htmlAttributes = new { @class = "form-control", @data_date_format = "YYYY-MM-DD HH:mm" } })
+                    <div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+                </div>
+                <div class="checkbox pull-left">&nbsp;to&nbsp;</div>
+                <div class="input-group col-sm-3">
+                    @Html.EditorFor(model => model.To, new { htmlAttributes = new { @class = "form-control", @data_date_format = "YYYY-MM-DD HH:mm" } })
+                    <div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div>
+                </div>
+                @Html.ValidationMessageFor(model => model.From, "", new { @class = "text-danger" })
+                @Html.ValidationMessageFor(model => model.To, "", new { @class = "text-danger" })
+            </div>
         </div>
 
         <div class="form-group">
@@ -45,6 +77,15 @@
             <div class="col-md-10">
                 @Html.EditorFor(model => model.Location, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.Location, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Participants, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                <input type="hidden" id="Participants" name="Participants" value="@Json.Encode(Model.Participants.Select(u => new { id = u.Id, text = u.UserName, locked = Model.Owner.Equals(u) }))" />
+                <input type="hidden" id="ParticipantsSelect2" value="@String.Join(",", Model.Participants.Select(u => u.Id ))" />
+                @Html.ValidationMessageFor(model => model.Participants, "", new { @class = "text-danger" })
             </div>
         </div>
 
@@ -68,6 +109,7 @@
             <div class="col-md-offset-2 col-md-10">
                 <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> Save</button>
                 @*<input type="submit" value="Save" class="btn btn-default" />*@
+                <a href="@Url.Action("Delete", "Meetings", new { id = Model.ID })" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> Delete</a>
             </div>
         </div>
     </div>
@@ -75,7 +117,7 @@
 
 <div>
     @*@Html.ActionLink("Back to List", "Index")*@
-    <a href="@Url.Action("Index", "Meetings")" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to List</a>
+    <a href="@Url.Action("Details", "Meetings", new { id = Model.ID })" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to meeting</a>
 </div>
 
 @section Scripts {
@@ -87,4 +129,65 @@
         $('#Agenda').ckeditor();
         $('#Summary').ckeditor();
     </script>
+
+    @Scripts.Render("~/bundles/editjs")
+    <script type="text/javascript">
+        $("#ParticipantsSelect2").select2({
+            placeholder: 'Invite participants',
+            minimumInputLength: 3,
+            multiple: true,
+            ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
+                url: "/Meetings/SearchParticipants",
+                dataType: 'json',
+                type: 'POST',
+                quietMillis: 250,
+                data: function (term, page) {
+                    return {
+                        q: term, // search term
+                    };
+                },
+                results: function (data, page) { // parse the results into the format expected by Select2.
+                    // since we are using custom formatting functions we do not need to alter the remote JSON data
+                    return { results: data };
+                },
+                cache: true
+            },
+            initSelection: function (element, callback) {
+                var val = $('#Participants').val();
+                callback(JSON.parse(val));
+            },
+            //formatResult: repoFormatResult, // omitted for brevity, see the source of this page
+            //formatSelection: repoFormatSelection,  // omitted for brevity, see the source of this page
+            //dropdownCssClass: "bigdrop", // apply css that makes the dropdown taller
+            //escapeMarkup: function (m) { return m; } // we do not want to escape markup since we are displaying html in results
+        })
+        .on('change', function(e) {
+            var data = $("#ParticipantsSelect2").select2("data");
+            console.log('Data changed: ', JSON.stringify(data));
+            $('#Participants').val(JSON.stringify(data));
+        });
+
+        (function () {
+            var $from = $('#From').datetimepicker({ sideBySide: true });
+            var $to = $('#To').datetimepicker({ sideBySide: true });
+            $from.on('dp.change', function (e) {
+                $to.data('DateTimePicker').setMinDate(e.date);
+                //$to.data('DateTimePicker').setDefaultDate(e.date);
+                if (!$to.val()) {
+                    $to.val($from.val())
+                }
+            });
+            $to.on('dp.change', function (e) {
+                $from.data('DateTimePicker').setMaxDate(e.date);
+                //$from.data('DateTimePicker').setDefaultDate(e.date);
+                if (!$from.val()) {
+                    $from.val($to.val())
+                }
+            });
+        })();
+    </script>
+}
+
+@section Styles {
+    @Styles.Render("~/Content/editcss")
 }
