@@ -262,6 +262,8 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\flatly.bootstrap.css" />
     <Content Include="Content\flatly.bootstrap.min.css" />
+    <Content Include="Content\select2-bootstrap.css" />
+    <Content Include="Content\select2.css" />
     <Content Include="Content\select2.png" />
     <Content Include="Content\select2x2.png" />
     <Content Include="favicon.ico" />
@@ -292,6 +294,7 @@
     <Content Include="Scripts\respond.matchmedia.addListener.js" />
     <Content Include="Scripts\respond.matchmedia.addListener.min.js" />
     <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\select2.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
