@@ -1,8 +1,14 @@
 ﻿using Novacode;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
+using System.Net.Mime;
+using System.Text;
 using System.Web;
 
 namespace MeetingCatalogue.Utilities
@@ -12,12 +18,12 @@ namespace MeetingCatalogue.Utilities
         public static void CreateWordDocument()
         {
            // TODO location chooser? or something more general
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            //string path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             
-            string fileName = path+System.IO.Path.DirectorySeparatorChar+"MeetingDetails.docx";
+            //string fileName = path+System.IO.Path.DirectorySeparatorChar+"MeetingDetails.docx";
 
             // Create the document in memory:
-            var document = DocX.Create(fileName);
+            var document = DocX.Create("MD.docx");
 
             // Add a Table to this document.
             Table t = document.AddTable(8, 2);
@@ -38,7 +44,7 @@ namespace MeetingCatalogue.Utilities
             t.Rows[7].Cells[0].Paragraphs.First().Append("Summary");
 
             // set meeting details
-            // TODO switch, add meeting as a parameter
+            // TODO switch, add meeting, user as a parameter
             t.Rows[0].Cells[1].Paragraphs.First().Append("Created");
             t.Rows[1].Cells[1].Paragraphs.First().Append("Created");
             t.Rows[2].Cells[1].Paragraphs.First().Append("Created");
@@ -72,10 +78,47 @@ namespace MeetingCatalogue.Utilities
             // Insert the Table into the document.
             document.InsertTable(t);
 
-            document.Save(); // Release this document from memory.
 
-            // Open in Word:
-            Process.Start("WINWORD.EXE", fileName);
+            MailMessage msg = new MailMessage();
+            msg.From = new MailAddress("meetingcatalogue@meetingcatalogue.com");
+            msg.To.Add(new MailAddress("berkiendre@gmail.com"));
+            msg.Subject = "subject";
+            msg.Body = "body";
+
+            var credentials = new NetworkCredential(
+                       ConfigurationManager.AppSettings["mailAccount"],
+                       ConfigurationManager.AppSettings["mailPassword"]
+                       );
+
+
+            SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
+            smtpClient.Credentials = credentials;
+            
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                byte[] contentAsBytes = Encoding.UTF8.GetBytes(document.Text);
+                memoryStream.Write(contentAsBytes, 0, contentAsBytes.Length);
+
+                // Set the position to the beginning of the stream.
+                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                // Create attachment
+                ContentType contentType = new ContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+                contentType.MediaType = MediaTypeNames.Application.Rtf;
+                contentType.Name = "Meeting details";
+                Attachment attachment = new Attachment(memoryStream, contentType);
+
+                // Add the attachment
+                msg.Attachments.Add(attachment);
+
+                // Send Mail via SmtpClient
+                smtpClient.Send(msg);
+            }
+
+            //document.Save(); // Release this document from memory.
+
+            //// Open in Word:
+            //Process.Start("WINWORD.EXE", fileName);
 
         }
 
