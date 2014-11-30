@@ -11,6 +11,7 @@ using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
 using System.Web;
+using System.Web.Mvc;
 
 namespace MeetingCatalogue.Utilities
 {
@@ -21,8 +22,10 @@ namespace MeetingCatalogue.Utilities
 
     public class Mailer
     {
-        public static void SendEmail(Meeting meeting, ActionType action)
+        public static void SendEmail(Meeting meeting, ActionType action, UrlHelper urlHelper)
         {
+            string url = urlHelper.Action("Details", "Meetings", new { id = meeting.ID }, "https");
+
             MailMessage msg = new MailMessage();
             msg.From = new MailAddress("meetingtracker@meetingtracker.com", "Meeting Tracker");
             foreach (var user in meeting.Participants)
@@ -31,9 +34,9 @@ namespace MeetingCatalogue.Utilities
             }
             msg.Subject = meeting.Title;
 
-            msg.Body = GetBody(meeting, action);
+            msg.Body = GetBody(meeting, action, url);
 
-            var ical = new System.Net.Mail.Attachment(new MemoryStream( Encoding.UTF8.GetBytes( GetCalendarEntry(meeting, action) ) ), new System.Net.Mime.ContentType("text/calendar"));
+            var ical = new System.Net.Mail.Attachment(new MemoryStream( Encoding.UTF8.GetBytes( GetCalendarEntry(meeting, action, url) ) ), new System.Net.Mime.ContentType("text/calendar"));
             msg.Attachments.Add(ical);
 
             //System.Net.Mime.ContentType contype = new System.Net.Mime.ContentType("text/calendar");
@@ -54,12 +57,21 @@ namespace MeetingCatalogue.Utilities
             smtpClient.Send(msg);
         }
 
-        private static string GetBody(Meeting meeting, ActionType action)
+        private static string GetBody(Meeting meeting, ActionType action, string url)
         {
-            return String.Format("{0} event was {1}.", meeting.Title, action.ToString().ToLower());
+            var text = String.Format("Event was {1}.\n\n", meeting.Title, action.ToString().ToLower());
+
+            text += String.Format("From: {0}\n", meeting.From.Value.ToString("yyyy-MM-dd HH:mm"));
+            text += String.Format("To: {0}\n", meeting.To.Value.ToString("yyyy-MM-dd HH:mm"));
+            text += String.Format("Location: {0}\n", meeting.Location);
+            text += String.Format("Organizer: {0}\n", meeting.Owner.UserName);
+
+            text += String.Format("\nDetails:\n{0}\n", url);
+
+            return text;
         }
 
-        private static string GetCalendarEntry(Meeting meeting, ActionType action)
+        private static string GetCalendarEntry(Meeting meeting, ActionType action, string url)
         {
             var iCal = new iCalendar();
 
@@ -73,7 +85,7 @@ namespace MeetingCatalogue.Utilities
             evt.Location = meeting.Location;
 
             evt.LastModified = new iCalDateTime(DateTime.Now);
-            // TODO: Generate UID
+            evt.UID = url;
             evt.Status = action == ActionType.Deleted ? EventStatus.Cancelled : EventStatus.Confirmed;
 
             string calendarEvent = new iCalendarSerializer().SerializeToString(iCal);

@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 
@@ -39,7 +40,7 @@ namespace MeetingCatalogue.Utilities
             //t.Design = TableDesign.MediumGrid1Accent2;
 
             // Add paramater names
-            //t.Rows[0].Cells[0].Paragraphs.First().Append("Created");
+            t.Rows[0].Cells[0].Paragraphs.First().Append("Creation time");
             t.Rows[1].Cells[0].Paragraphs.First().Append("Organizer");
             t.Rows[2].Cells[0].Paragraphs.First().Append("Participants");
             t.Rows[3].Cells[0].Paragraphs.First().Append("From");
@@ -56,16 +57,15 @@ namespace MeetingCatalogue.Utilities
 
             // set meeting details
             // TODO switch, add meeting, user as a parameter
-            //t.Rows[0].Cells[1].Paragraphs.First().Append("Created");
+            t.Rows[0].Cells[1].Paragraphs.First().Append(meeting.CreatedOn.ToString("yyyy-MM-dd HH:mm"));
             t.Rows[1].Cells[1].Paragraphs.First().Append(meeting.Owner.UserName);
             //t.Rows[2].Cells[1].Paragraphs.First().Append(String.Join(", ", meeting.Participants.Select(u => u.UserName)));
             t.Rows[2].Cells[1].InsertList(participants);
             t.Rows[3].Cells[1].Paragraphs.First().Append(meeting.From.Value.ToString("yyyy-MM-dd HH:mm"));
             t.Rows[4].Cells[1].Paragraphs.First().Append(meeting.To.Value.ToString("yyyy-MM-dd HH:mm"));
             t.Rows[5].Cells[1].Paragraphs.First().Append(meeting.Location);
-            // TODO: convert HTML to DocX or at least strip it
-            t.Rows[6].Cells[1].Paragraphs.First().Append(meeting.Agenda);
-            t.Rows[7].Cells[1].Paragraphs.First().Append(meeting.Summary);
+            t.Rows[6].Cells[1].Paragraphs.First().Append(StripHtml(meeting.Agenda));
+            t.Rows[7].Cells[1].Paragraphs.First().Append(StripHtml(meeting.Summary));
 
             //t.Rows[0].Cells[1].Paragraphs.First().Append(meeting.Created.ToString());
             //t.Rows[1].Cells[1].Paragraphs.First().Append(meeting.Owner.ToString());
@@ -141,5 +141,11 @@ namespace MeetingCatalogue.Utilities
         //    //// Open in Word:
         //    //Process.Start("WINWORD.EXE", fileName);
         //}
+
+        private static string StripHtml(string text)
+        {
+            string pattern = @"<(.|\n)*?>";
+            return Regex.Replace(text, pattern, string.Empty);
+        }
     }
 }

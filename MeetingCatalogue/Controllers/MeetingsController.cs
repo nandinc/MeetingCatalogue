@@ -174,7 +174,7 @@ namespace MeetingCatalogue.Controllers
             if (ModelState.IsValid)
             {
                 db.Meetings.Add(meeting);
-                Mailer.SendEmail(meeting, ActionType.Created);
+                Mailer.SendEmail(meeting, ActionType.Created, Url);
                 db.SaveChanges();
 
                 return RedirectToAction("Index");
@@ -232,7 +232,7 @@ namespace MeetingCatalogue.Controllers
                 db.SaveChanges();
                 if (changed)
                 {
-                    Mailer.SendEmail(meeting, ActionType.Updated);
+                    Mailer.SendEmail(meeting, ActionType.Updated, Url);
                 }
                 return RedirectToAction("Index");
             }
@@ -273,7 +273,7 @@ namespace MeetingCatalogue.Controllers
             }
             db.Meetings.Remove(meeting);
             db.SaveChanges();
-            Mailer.SendEmail(meeting, ActionType.Deleted);
+            Mailer.SendEmail(meeting, ActionType.Deleted, Url);
             return RedirectToAction("Index");
         }
 

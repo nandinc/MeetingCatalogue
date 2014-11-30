@@ -21,7 +21,7 @@
     }
     function enableEditing() {
         if (!initialized) {
-            $editArea = $('<div class="editable-area"><div class="notifications"></div><div class="well new-content" style="display: none"></div><textarea></textarea><div class=""><button class="btn btn-success save-button"><span class="glyphicon glyphicon-ok"></span> Save</button><button class="btn btn-danger close-button pull-right"><span class="glyphicon glyphicon-ok"></span> Close</button></div></div>').insertBefore($self);
+            $editArea = $('<div class="editable-area"><div class="notifications"></div><div class="well new-content" style="display: none"></div><textarea></textarea><div class=""><button class="btn btn-success save-button"><span class="glyphicon glyphicon-ok"></span> Save</button><button class="btn btn-danger close-button pull-right"><span class="glyphicon glyphicon-remove"></span> Close</button></div></div>').insertBefore($self);
             $textarea = $editArea.find('textarea').ckeditor();
 
             $editArea.find('.save-button').click(save);
