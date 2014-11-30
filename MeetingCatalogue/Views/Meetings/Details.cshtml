@@ -70,11 +70,14 @@
 
 <p>
     <a href="@Url.Action("Index", "Meetings")" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to List</a>
+    
+    <a href="@Url.Action("Report", "Meetings", new { id = Model.ID })" class="btn btn-default"><span class="glyphicon glyphicon-download"></span> Download report</a>
 
     @if (Model.CanEdit(ViewBag.CurrentUser))
     {
         <a href="@Url.Action("Edit", "Meetings", new { id = Model.ID })" class="btn btn-primary"><span class="glyphicon glyphicon-edit"></span> Edit</a>
     }
+    
     @if (Model.CanDelete(ViewBag.CurrentUser))
     {
         <a href="@Url.Action("Delete", "Meetings", new { id = Model.ID })" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete</a>

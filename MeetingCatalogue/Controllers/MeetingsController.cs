@@ -13,6 +13,9 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Security.Application;
 using PagedList;
+using MeetingCatalogue.Utilities;
+using System.IO;
+using System.Text;
 
 namespace MeetingCatalogue.Controllers
 {
@@ -267,8 +270,8 @@ namespace MeetingCatalogue.Controllers
             return RedirectToAction("Index");
         }
 
-        // GET: Meetings/GenerateReport/5
-        public ActionResult GenerateReport(int? id)
+        // GET: Meetings/Report/5
+        public ActionResult Report(int? id)
         {
             if (id == null)
             {
@@ -285,34 +288,12 @@ namespace MeetingCatalogue.Controllers
                 return new HttpUnauthorizedResult();
             }
 
-            return View(meeting);
-        }
+            var memoryStream = DocXTemplate.CreateWordDocument(meeting);
 
-        // POST: Meetings/GenerateReport/5
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult GenerateReportConfirmed(int? id)
-        {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Meeting meeting = db.Meetings.Find(id);
-            if (meeting == null)
-            {
-                return HttpNotFound();
-            }
+            // Set the position to the beginning of the stream.
+            memoryStream.Seek(0, SeekOrigin.Begin);
 
-            if (!meeting.CanView(CurrentUser))
-            {
-                return new HttpUnauthorizedResult();
-            }
-
-            // TODO: Send report
-
-            return View(meeting);
+            return File(memoryStream, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "meeting" + meeting.ID + ".docx");
         }
 
         // POST: Meetings/SearchParticipants?q=Username
