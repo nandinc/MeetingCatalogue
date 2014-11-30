@@ -28,7 +28,7 @@ namespace MeetingCatalogue.Controllers
             public string text { get; set; }
             public bool locked { get; set; }
         }
-        
+
         private MeetingCatalogueContext db = new MeetingCatalogueContext();
 
         private ApplicationUser currentUser;
@@ -174,7 +174,9 @@ namespace MeetingCatalogue.Controllers
             if (ModelState.IsValid)
             {
                 db.Meetings.Add(meeting);
+                Mailer.SendEmail(meeting, ActionType.Created);
                 db.SaveChanges();
+
                 return RedirectToAction("Index");
             }
 
@@ -222,12 +224,16 @@ namespace MeetingCatalogue.Controllers
                 return new HttpUnauthorizedResult();
             }
 
-            UpdateMeeting(meeting, newMeeting, Participants, false);
+            bool changed = UpdateMeeting(meeting, newMeeting, Participants, false);
 
             if (ModelState.IsValid)
             {
                 //db.Entry(meeting).State = EntityState.Modified;
                 db.SaveChanges();
+                if (changed)
+                {
+                    Mailer.SendEmail(meeting, ActionType.Updated);
+                }
                 return RedirectToAction("Index");
             }
 
@@ -267,6 +273,7 @@ namespace MeetingCatalogue.Controllers
             }
             db.Meetings.Remove(meeting);
             db.SaveChanges();
+            Mailer.SendEmail(meeting, ActionType.Deleted);
             return RedirectToAction("Index");
         }
 
@@ -380,7 +387,7 @@ namespace MeetingCatalogue.Controllers
             return Json(new { success = success, timestamp = meeting.SummaryUpdatedTicks, text = meeting.Summary });
         }
 
-        private void UpdateMeeting(Meeting meeting, Meeting newMeeting, string userData, bool isNew)
+        private bool UpdateMeeting(Meeting meeting, Meeting newMeeting, string userData, bool isNew)
         {
             // Parse user data
             var users = System.Web.Helpers.Json.Decode<ICollection<Participant>>(userData);
@@ -398,14 +405,6 @@ namespace MeetingCatalogue.Controllers
                 meeting.SummaryUpdated = DateTime.Now;
             }
 
-            // Update meeting data
-            meeting.Title = newMeeting.Title;
-            meeting.From = newMeeting.From;
-            meeting.To = newMeeting.To;
-            meeting.Location = newMeeting.Location;
-            meeting.Agenda = Sanitizer.GetSafeHtmlFragment(newMeeting.Agenda);
-            meeting.Summary = Sanitizer.GetSafeHtmlFragment(newMeeting.Summary);
-
             // Update participants
             var newUsers = users.Select(u => db.Users.Find(u.id));
 
@@ -414,6 +413,25 @@ namespace MeetingCatalogue.Controllers
             var keptParticipants = participants.Where(u => ids.Contains(u.Id));
             var removedParticipants = participants.Where(u => !(ids.Contains(u.Id)));
             var addedParticipants = users.Select(u => db.Users.Find(u.id)).Except(keptParticipants);
+
+            bool changed = false;
+            if (meeting.Title != newMeeting.Title ||
+                meeting.From != newMeeting.From ||
+                meeting.To != newMeeting.To ||
+                meeting.Location != newMeeting.Location ||
+                removedParticipants.Count() > 0 ||
+                addedParticipants.Count() > 0)
+            {
+                changed = true;
+            }
+
+            // Update meeting data
+            meeting.Title = newMeeting.Title;
+            meeting.From = newMeeting.From;
+            meeting.To = newMeeting.To;
+            meeting.Location = newMeeting.Location;
+            meeting.Agenda = Sanitizer.GetSafeHtmlFragment(newMeeting.Agenda);
+            meeting.Summary = Sanitizer.GetSafeHtmlFragment(newMeeting.Summary);
 
             foreach (var user in removedParticipants)
             {
@@ -425,8 +443,10 @@ namespace MeetingCatalogue.Controllers
                 meeting.Participants.Add(user);
             }
 
-            // Send e-mail, etc.
+            return changed;
         }
+
+
 
         protected override void Dispose(bool disposing)
         {
