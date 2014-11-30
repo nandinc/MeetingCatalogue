@@ -25,8 +25,14 @@ namespace MeetingCatalogue.Models
         public string Title { get; set; }
         [DataType(DataType.MultilineText), AllowHtml]
         public string Agenda { get; set; }
+        public DateTime AgendaUpdated { get; set; }
+        [NotMapped]
+        public long AgendaUpdatedTicks { get { return this.AgendaUpdated.Ticks / TimeSpan.TicksPerSecond; } }
         [DataType(DataType.MultilineText), AllowHtml]
         public string Summary { get; set; }
+        public DateTime SummaryUpdated { get; set; }
+        [NotMapped]
+        public long SummaryUpdatedTicks { get { return this.SummaryUpdated.Ticks / TimeSpan.TicksPerSecond; } }
         public DateTime CreatedOn { get; set; }
 
         public virtual ICollection<ApplicationUser> Participants { get; private set; }

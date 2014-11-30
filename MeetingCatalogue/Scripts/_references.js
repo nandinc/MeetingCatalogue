@@ -10,3 +10,4 @@
 /// <reference path="moment-with-locales.js" />
 /// <reference path="bootstrap-datetimepicker.min.js" />
 /// <reference path="select2.js" />
+/// <reference path="site.js" />

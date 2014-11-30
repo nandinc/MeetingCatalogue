@@ -55,35 +55,37 @@
 </div>
 
 <h4>@Html.DisplayNameFor(model => model.Agenda)</h4>
-@if (Model.Agenda.IsEmpty())
-{
-    <p><em>No agenda yet.</em></p>
-}
-else
-{
-    @Html.Raw(@Model.Agenda)
-    @*@Html.DisplayFor(model => model.Agenda)*@
-}
+<div class="editable-widget" id="agenda">
+    <div class="content">
+        @Html.Raw(@Model.Agenda)
+    </div>
+</div>
 
 <h4>@Html.DisplayNameFor(model => model.Summary)</h4>
-@if (Model.Summary.IsEmpty())
-{
-    <p><em>No summary yet.</em></p>
-}
-else
-{
-    @Html.Raw(@Model.Summary)
-    @*@Html.DisplayFor(model => model.Summary)*@
-}
+<div class="editable-widget" id="summary">
+    <div class="content">
+        @Html.Raw(@Model.Summary)
+    </div>
+</div>
 
 <p>
     <a href="@Url.Action("Index", "Meetings")" class="btn btn-default"><span class="glyphicon glyphicon-chevron-left"></span> Back to List</a>
-    @*@Html.ActionLink("Back to List", "Index")*@
 
-    @*<div class="btn-group-vertical" role="group">*@
+    @if (Model.CanEdit(ViewBag.CurrentUser))
+    {
         <a href="@Url.Action("Edit", "Meetings", new { id = Model.ID })" class="btn btn-primary"><span class="glyphicon glyphicon-edit"></span> Edit</a>
+    }
+    @if (Model.CanDelete(ViewBag.CurrentUser))
+    {
         <a href="@Url.Action("Delete", "Meetings", new { id = Model.ID })" class="btn btn-danger"><span class="glyphicon glyphicon-trash"></span> Delete</a>
-        @* Delete *@
-    @*</div>*@
-    @*@Html.ActionLink("<span class=\"glyphicon glyphicon-edit\"></span> Edit", "Edit", new { id = Model.ID }, new { @class = "btn btn-default" }) |*@
+    }
 </p>
+
+@section Scripts {
+    <script src="//cdn.ckeditor.com/4.4.6/standard/ckeditor.js"></script>
+    <script src="//cdn.ckeditor.com/4.4.6/standard/adapters/jquery.js"></script>
+    <script type="text/javascript">
+        $('#agenda').editableWidget({ id: @Model.ID, name: 'agenda', timestamp: @Model.AgendaUpdatedTicks, endpoint: '/Meetings/UpdateAgenda' });
+        $('#summary').editableWidget({ id: @Model.ID, name: 'summary', timestamp: @Model.SummaryUpdatedTicks, endpoint: '/Meetings/UpdateSummary' });
+    </script>
+}
