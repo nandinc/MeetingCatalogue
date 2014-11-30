@@ -21,10 +21,15 @@
     }
     function enableEditing() {
         if (!initialized) {
-            $editArea = $('<div class="editable-area"><div class="notifications"></div><div class="well new-content" style="display: none"></div><textarea></textarea><div class=""><button class="btn btn-success save-button"><span class="glyphicon glyphicon-ok"></span> Save</button></div></div>').insertBefore($self);
+            $editArea = $('<div class="editable-area"><div class="notifications"></div><div class="well new-content" style="display: none"></div><textarea></textarea><div class=""><button class="btn btn-success save-button"><span class="glyphicon glyphicon-ok"></span> Save</button><button class="btn btn-danger close-button pull-right"><span class="glyphicon glyphicon-ok"></span> Close</button></div></div>').insertBefore($self);
             $textarea = $editArea.find('textarea').ckeditor();
 
             $editArea.find('.save-button').click(save);
+            $editArea.find('.close-button').click(function () {
+                if (confirm('Are you sure you want to discard your changes?')) {
+                    disableEditing(true);
+                }
+            });
         }
 
         $editArea.show();
@@ -32,15 +37,17 @@
         $self.hide();
     }
 
-    function disableEditing() {
+    function disableEditing(discardChanges) {
         $editArea.hide();
-        $self.find('.content').html($textarea.val());
-        updateNoContent();
+        if (!discardChanges) {
+            $self.find('.content').html($textarea.val());
+            updateNoContent();
+        }
         $self.show();
     }
 
     function updateNoContent() {
-        if ($self.find('.content').text() == '') {
+        if ($.trim($self.find('.content').text()) == '') {
             $self.find('.no-content').show();
         } else {
             $self.find('.no-content').hide();
@@ -55,7 +62,7 @@
             if (data.success) {
                 //showNotification('success', 'Successfully saved ' + options.name);
                 $editArea.find('.new-content').hide();
-                disableEditing();
+                disableEditing(false);
             } else if (data.text) {
                 showNotification('warning', 'The ' + options.name + ' was updated while you were editing. Please review the new text below, update your text accordingly, and save again.');
                 $editArea.find('.new-content').html(data.text).show();

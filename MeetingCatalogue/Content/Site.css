@@ -76,6 +76,6 @@ textarea {
 .editable-widget p:last-child {
     margin-bottom: 0;
 }
-.save-button {
+.editable-area > div > button {
     margin: 6px 0;
 }
