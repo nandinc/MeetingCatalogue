@@ -42,18 +42,12 @@
     <Reference Include="AntiXssLibrary">
       <HintPath>..\packages\AntiXSS.4.3.0\lib\net40\AntiXssLibrary.dll</HintPath>
     </Reference>
-    <Reference Include="antlr.runtime">
-      <HintPath>..\..\..\..\Desktop\DDay-iCal-1_0_2-BetaCandidate2-bin\antlr.runtime.dll</HintPath>
-    </Reference>
     <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="DDay.Collections">
-      <HintPath>..\..\..\..\Desktop\DDay-iCal-1_0_2-BetaCandidate2-bin\DDay.Collections.dll</HintPath>
-    </Reference>
     <Reference Include="DDay.iCal">
-      <HintPath>..\..\..\..\Desktop\DDay-iCal-1_0_2-BetaCandidate2-bin\DDay.iCal.dll</HintPath>
+      <HintPath>..\packages\DDay.iCal.1.0.2.575\lib\DDay.iCal.dll</HintPath>
     </Reference>
     <Reference Include="DocX">
       <HintPath>..\packages\DocX.1.0.0.13\lib\net40\DocX.dll</HintPath>
@@ -295,6 +289,7 @@
     <Content Include="Scripts\respond.matchmedia.addListener.min.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\select2.js" />
+    <Content Include="Scripts\site.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -332,6 +327,8 @@
     <Content Include="Views\Meetings\Index.cshtml" />
     <Content Include="Utilities\client_secrets.json" />
     <Content Include="Views\Home\_Meeting.cshtml" />
+    <Content Include="Views\Meetings\_Form.cshtml" />
+    <Content Include="Views\Meetings\_FormScripts.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

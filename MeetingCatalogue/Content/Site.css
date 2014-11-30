@@ -28,26 +28,54 @@ textarea {
     overflow: auto;
     margin-bottom: 16px;
 }
-
 .meeting-widget .meeting-title {
     display: block;
     font-weight: bold;
 }
-
 .meeting-widget .meeting-date {
     display: block;
     float: left;
 }
-
 .meeting-widget .meeting-location {
     display: block;
     float: right;
     font-style: italic;
     padding-left: 10px;
 }
-
 .meeting-widget .meeting-participants {
     display: block;
     clear: both;
     font-size: 90%;
+}
+
+.editable-widget {
+    position: relative;
+    /*min-height: 30px;*/
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 6px;
+    margin-bottom: 10px;
+}
+.editable-widget:hover {
+    border-color: #ccc;
+}
+.editable-widget .edit-sign {
+    display: none;
+    cursor: pointer;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: #eee;
+    width: 24px;
+    padding: 6px 6px 6px 6px;
+}
+.editable-widget:hover .edit-sign {
+    display: block;
+}
+.editable-widget p:last-child {
+    margin-bottom: 0;
+}
+.save-button {
+    margin: 6px 0;
 }

@@ -50,6 +50,8 @@ namespace MeetingCatalogue.Controllers
                                orderby meeting.From descending
                                select meeting).Take(5).ToList();
 
+            ViewBag.CurrentUser = CurrentUser;
+
             return View(viewModel);
         }
 

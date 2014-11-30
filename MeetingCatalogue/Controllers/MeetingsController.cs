@@ -44,6 +44,7 @@ namespace MeetingCatalogue.Controllers
         // GET: Meetings
         public ActionResult Index()
         {
+            ViewBag.CurrentUser = CurrentUser;
             return View(db.Meetings.ToList());
         }
 
@@ -63,6 +64,7 @@ namespace MeetingCatalogue.Controllers
             {
                 return new HttpUnauthorizedResult();
             }
+            ViewBag.CurrentUser = CurrentUser;
             return View(meeting);
         }
 
@@ -72,9 +74,8 @@ namespace MeetingCatalogue.Controllers
             var meeting = new Meeting()
             {
                 Owner = CurrentUser,
-                CreatedOn = DateTime.Now,
             };
-            meeting.Participants.Add(meeting.Owner);
+            meeting.Participants.Add(CurrentUser);
             
             return View(meeting);
         }
@@ -90,9 +91,11 @@ namespace MeetingCatalogue.Controllers
             {
                 Owner = CurrentUser,
                 CreatedOn = DateTime.Now,
+                AgendaUpdated = DateTime.Now,
+                SummaryUpdated = DateTime.Now,
             };
 
-            updateMeeting(meeting, newMeeting, Participants, true);
+            UpdateMeeting(meeting, newMeeting, Participants, true);
             
             if (ModelState.IsValid)
             {
@@ -143,7 +146,7 @@ namespace MeetingCatalogue.Controllers
                 return new HttpUnauthorizedResult();
             }
 
-            updateMeeting(meeting, newMeeting, Participants, false);
+            UpdateMeeting(meeting, newMeeting, Participants, false);
 
             if (ModelState.IsValid)
             {
@@ -252,13 +255,90 @@ namespace MeetingCatalogue.Controllers
             return Json(users);
         }
 
-        private void updateMeeting(Meeting meeting, Meeting newMeeting, string userData, bool isNew)
+        // POST: Meetings/UpdateAgenda
+        [HttpPost]
+        [ValidateInput(false)] 
+        public ActionResult UpdateAgenda(int id, string text, long timestamp)
+        {
+            Meeting meeting = db.Meetings.Find(id);
+            if (meeting == null)
+            {
+                return HttpNotFound();
+            }
+
+            if (!meeting.CanView(CurrentUser))
+            {
+                return new HttpUnauthorizedResult();
+            }
+
+            bool success;
+            if (meeting.AgendaUpdatedTicks <= timestamp)
+            {
+                meeting.Agenda = Sanitizer.GetSafeHtmlFragment(text);
+                meeting.AgendaUpdated = DateTime.Now;
+
+                db.SaveChanges();
+
+                success = true;
+            }
+            else
+            {
+                success = false;
+            }
+
+            return Json(new { success = success, timestamp = meeting.AgendaUpdatedTicks, text = meeting.Agenda });
+        }
+
+        // POST: Meetings/UpdateSummary
+        [HttpPost]
+        [ValidateInput(false)] 
+        public ActionResult UpdateSummary(int id, string text, long timestamp)
+        {
+            Meeting meeting = db.Meetings.Find(id);
+            if (meeting == null)
+            {
+                return HttpNotFound();
+            }
+
+            if (!meeting.CanView(CurrentUser))
+            {
+                return new HttpUnauthorizedResult();
+            }
+
+            bool success;
+            if (meeting.SummaryUpdatedTicks <= timestamp)
+            {
+                meeting.Summary = Sanitizer.GetSafeHtmlFragment(text);
+                meeting.SummaryUpdated = DateTime.Now;
+
+                db.SaveChanges();
+
+                success = true;
+            }
+            else
+            {
+                success = false;
+            }
+
+            return Json(new { success = success, timestamp = meeting.SummaryUpdatedTicks, text = meeting.Summary });
+        }
+
+        private void UpdateMeeting(Meeting meeting, Meeting newMeeting, string userData, bool isNew)
         {
             // Parse user data
             var users = System.Web.Helpers.Json.Decode<ICollection<Participant>>(userData);
             if (users == null)
             {
                 throw new HttpException(400, "Bad Request");
+            }
+
+            if (meeting.Agenda != newMeeting.Agenda)
+            {
+                meeting.AgendaUpdated = DateTime.Now;
+            }
+            if (meeting.Summary != newMeeting.Summary)
+            {
+                meeting.SummaryUpdated = DateTime.Now;
             }
 
             // Update meeting data
