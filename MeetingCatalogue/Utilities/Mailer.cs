@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Net.Mime;
+using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
@@ -77,6 +78,7 @@ namespace MeetingCatalogue.Utilities
 
             var evt = iCal.Create<DDay.iCal.Event>();
             evt.Name = meeting.Title;
+            evt.Summary = meeting.Title;
             evt.Organizer = new Organizer(meeting.Owner.Email);
 
             evt.Created = new iCalDateTime(meeting.CreatedOn);
@@ -85,7 +87,7 @@ namespace MeetingCatalogue.Utilities
             evt.Location = meeting.Location;
 
             evt.LastModified = new iCalDateTime(DateTime.Now);
-            evt.UID = url;
+            evt.UID = Convert.ToBase64String(((HashAlgorithm)CryptoConfig.CreateFromName("MD5")).ComputeHash(new UTF8Encoding().GetBytes(url)));
             evt.Status = action == ActionType.Deleted ? EventStatus.Cancelled : EventStatus.Confirmed;
 
             string calendarEvent = new iCalendarSerializer().SerializeToString(iCal);
