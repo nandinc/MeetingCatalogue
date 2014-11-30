@@ -30,7 +30,7 @@
         }
     </div>
     <div class="col-md-4">
-        <h2>Owned meetings</h2>
+        <h2>Organized by me</h2>
         @foreach (var meeting in Model.Owned)
         {
             @Html.Partial("~/Views/Home/_Meeting.cshtml", meeting)

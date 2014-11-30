@@ -60,7 +60,7 @@ namespace MeetingCatalogue.Models
 
         public bool CanDelete(ApplicationUser user)
         {
-            return user.Equals(Owner);
+            return user.Equals(Owner) && To > DateTime.Now;
         }
     }
 }

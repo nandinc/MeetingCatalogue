@@ -69,8 +69,8 @@
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-ok"></span> @ViewBag.ActionLabel</button>
-                @if (ViewBag.ShowDelete)
+                <button type="submit" class="btn btn-success"><span class="glyphicon glyphicon-ok"></span> @ViewBag.ActionLabel</button>
+                @if (ViewBag.ShowDelete && Model.CanDelete(ViewBag.CurrentUser))
                 {
                     <a href="@Url.Action("Delete", "Meetings", new { id = Model.ID })" class="btn btn-danger pull-right"><span class="glyphicon glyphicon-trash"></span> Delete</a>
                 }

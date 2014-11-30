@@ -24,7 +24,7 @@
                 <ul class="nav navbar-nav">
                     <li>@Html.ActionLink("Dashboard", "Index", "Home")</li>
                     <li>@Html.ActionLink("My meetings", "Index", "Meetings")</li>
-                    <li>@Html.ActionLink("Owned meetings", "Index", "Meetings")</li>
+                    <li>@Html.ActionLink("Organized by me", "Index", "Meetings", new { owned = 1 }, new { })</li>
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>

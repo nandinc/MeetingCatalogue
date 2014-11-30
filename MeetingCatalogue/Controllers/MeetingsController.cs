@@ -12,6 +12,7 @@ using System.Web.Security;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Security.Application;
+using PagedList;
 
 namespace MeetingCatalogue.Controllers
 {
@@ -42,10 +43,80 @@ namespace MeetingCatalogue.Controllers
         }
 
         // GET: Meetings
-        public ActionResult Index()
+        public ActionResult Index(string sort, string q, string owned, int? page)
         {
+            // Sorting, filtering and paging based on:
+            // http://www.asp.net/mvc/overview/getting-started/getting-started-with-ef-using-mvc/sorting-filtering-and-paging-with-the-entity-framework-in-an-asp-net-mvc-application
+
+            var meetings = from m in db.Meetings
+                           where m.Participants.Select(u => u.Id).Contains(CurrentUser.Id)
+                           select m;
+
+            ViewBag.FromSortParm = String.IsNullOrEmpty(sort) ? "from" : "";
+            ViewBag.ToSortParm = sort == "to_desc" ? "to" : "to_desc";
+            ViewBag.TitleSortParm = sort == "title" ? "title_desc" : "title";
+            ViewBag.LocationSortParm = sort == "location" ? "location_desc" : "location";
+            ViewBag.ParticipantsSortParm = sort == "participants_desc" ? "participants" : "participants";
+            ViewBag.OrganizerSortParm = sort == "organizer" ? "organizer_desc" : "organizer";
+            ViewBag.SortParam = sort;
+
+            if (!String.IsNullOrEmpty(q))
+            {
+                meetings = meetings.Where(m => m.Title.Contains(q));
+            }
+            ViewBag.QParam = q;
+
+            if (String.IsNullOrEmpty(owned))
+            {
+                meetings = meetings.Where(m => m.Owner.Id == CurrentUser.Id);
+            }
+            ViewBag.OwnedParam = owned;
+
+            switch (sort)
+            {
+                case "organizer_desc":
+                    meetings = meetings.OrderByDescending(m => m.Owner);
+                    break;
+                case "organizer":
+                    meetings = meetings.OrderBy(m => m.Owner);
+                    break;
+                case "participants_desc":
+                    meetings = meetings.OrderByDescending(m => m.Participants.Count);
+                    break;
+                case "participants":
+                    meetings = meetings.OrderBy(m => m.Participants.Count);
+                    break;
+                case "location_desc":
+                    meetings = meetings.OrderByDescending(m => m.Location);
+                    break;
+                case "location":
+                    meetings = meetings.OrderBy(m => m.Location);
+                    break;
+                case "title_desc":
+                    meetings = meetings.OrderByDescending(m => m.Title);
+                    break;
+                case "title":
+                    meetings = meetings.OrderBy(m => m.Title);
+                    break;
+                case "to_desc":
+                    meetings = meetings.OrderByDescending(m => m.To);
+                    break;
+                case "to":
+                    meetings = meetings.OrderBy(m => m.To);
+                    break;
+                case "from":
+                    meetings = meetings.OrderByDescending(m => m.From);
+                    break;
+                default:
+                    meetings = meetings.OrderBy(m => m.From);
+                    break;
+            }
+
             ViewBag.CurrentUser = CurrentUser;
-            return View(db.Meetings.ToList());
+
+            int pageSize = 10;
+            int pageNumber = (page ?? 1);
+            return View(meetings.ToPagedList(pageNumber, pageSize));
         }
 
         // GET: Meetings/Details/5
@@ -125,6 +196,8 @@ namespace MeetingCatalogue.Controllers
                 return new HttpUnauthorizedResult();
             }
 
+            ViewBag.CurrentUser = CurrentUser;
+
             return View(meeting);
         }
 
@@ -154,6 +227,9 @@ namespace MeetingCatalogue.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
+
+            ViewBag.CurrentUser = CurrentUser;
+
             return View(meeting);
         }
 
@@ -272,7 +348,7 @@ namespace MeetingCatalogue.Controllers
             }
 
             bool success;
-            if (meeting.AgendaUpdatedTicks <= timestamp)
+            if (meeting.AgendaUpdatedTicks == timestamp)
             {
                 meeting.Agenda = Sanitizer.GetSafeHtmlFragment(text);
                 meeting.AgendaUpdated = DateTime.Now;
@@ -306,7 +382,7 @@ namespace MeetingCatalogue.Controllers
             }
 
             bool success;
-            if (meeting.SummaryUpdatedTicks <= timestamp)
+            if (meeting.SummaryUpdatedTicks == timestamp)
             {
                 meeting.Summary = Sanitizer.GetSafeHtmlFragment(text);
                 meeting.SummaryUpdated = DateTime.Now;

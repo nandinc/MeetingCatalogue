@@ -1,67 +1,83 @@
-﻿@model IEnumerable<MeetingCatalogue.Models.Meeting>
+﻿@model PagedList.IPagedList<MeetingCatalogue.Models.Meeting>
+@using PagedList.Mvc;
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = !String.IsNullOrEmpty(ViewBag.Owned) ? "My meetings" : "Meetings";
 }
 
-<h2>Index</h2>
+<h2>@ViewBag.Title</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
+<p class="pull-left" style="margin-top: 2px;">
+    <a href="@Url.Action("Create", "Meetings")" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-plus"></span> Create New</a>
 </p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.Title)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.From)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.To)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Location)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Participants)
-        </th>
-        @*<th>
-            @Html.DisplayNameFor(model => model.Agenda)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Summary)
-        </th>*@
-        <th></th>
-    </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Title)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.From)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.To)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Location)
-        </td>
-        <td>@item.Participants.Count</td>
-        @*<td>
-            @Html.DisplayFor(modelItem => item.Agenda)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Summary)
-        </td>*@
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
-            @Html.ActionLink("Details", "Details", new { id=item.ID }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.ID })
-        </td>
-    </tr>
+@using (Html.BeginForm("Index", "Meetings", FormMethod.Get, new { @class = "form-inline pull-right" }))
+{
+    <div class="form-group">
+        <div class="input-group" style="width: 240px;">
+            <label class="sr-only" for="q">Filter</label>
+            @Html.TextBox("q", "", new { @class = "form-control", placeholder = "Filter title" })
+            <div class="input-group-addon"><span class="glyphicon glyphicon-search"></span></div>
+        </div>
+    </div>
+    <input type="submit" class="btn btn-default" value="Filter" />
+    <input type="hidden" name="sort" value="@ViewBag.SortParam" />
+    <input type="hidden" name="owned" value="@ViewBag.OwnedParam" />
 }
 
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                @Html.ActionLink("Title", "Index", new { sort = ViewBag.TitleSortParm, q = ViewBag.QParam, owned = ViewBag.OwnedParam })
+            </th>
+            <th>
+                @Html.ActionLink("From", "Index", new { sort = ViewBag.FromSortParm, q = ViewBag.QParam, owned = ViewBag.OwnedParam })
+            </th>
+            <th>
+                @Html.ActionLink("To", "Index", new { sort = ViewBag.ToSortParm, q = ViewBag.QParam, owned = ViewBag.OwnedParam })
+            </th>
+            <th>
+                @Html.ActionLink("Location", "Index", new { sort = ViewBag.LocationSortParm, q = ViewBag.QParam, owned = ViewBag.OwnedParam })
+            </th>
+            <th>
+                @Html.ActionLink("Participants", "Index", new { sort = ViewBag.ParticipantsSortParm, q = ViewBag.QParam, owned = ViewBag.OwnedParam })
+            </th>
+            <th>
+                @Html.ActionLink("Organizer", "Index", new { sort = ViewBag.OwnerSortParm, q = ViewBag.QParam, owned = ViewBag.OwnedParam })
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+    @foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.ActionLink(@item.Title, "Details", new { id = item.ID })
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.From)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.To)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Location)
+            </td>
+            <td>@item.Participants.Count</td>
+            <td>@item.Owner.UserName</td>
+            <td>
+                @if (item.CanEdit(ViewBag.CurrentUser)) { @Html.ActionLink("Edit", "Edit", new { id = item.ID }, new { @class = "btn btn-primary btn-xs" }) }
+                @if (item.CanDelete(ViewBag.CurrentUser)) { @Html.ActionLink("Delete", "Delete", new { id = item.ID }, new { @class = "btn btn-danger btn-xs" }) }
+            </td>
+        </tr>
+    }
+    </tbody>
 </table>
+
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index",
+    new { page, sort = ViewBag.SortParam, q = ViewBag.QParam, owned = ViewBag.OwnedParam }))
+

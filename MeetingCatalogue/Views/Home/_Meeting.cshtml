@@ -4,27 +4,28 @@
     <strong class="meeting-title">@Model.Title</strong>
     @if (Model.From.Value.Date == Model.To.Value.Date)
     {
-        <span class="meeting-date">@Model.From.Value.ToString("yyyy-MM-dd HH:mm") - @Model.To.Value.ToString("HH:mm")</span>
+        <span class="meeting-date" title="Meeting date">@Model.From.Value.ToString("yyyy-MM-dd HH:mm") - @Model.To.Value.ToString("HH:mm")</span>
     }
     else
     {
-        <span class="meeting-date">@Model.From.Value.ToString("yyyy-MM-dd HH:mm") - @Model.To.Value.ToString("yyyy-MM-dd HH:mm")</span>
+        <span class="meeting-date" title="Meeting date">@Model.From.Value.ToString("yyyy-MM-dd HH:mm") - @Model.To.Value.ToString("yyyy-MM-dd HH:mm")</span>
     }
     @if (!Model.Location.IsEmpty())
     {
-        <span class="meeting-location">@Model.Location</span>
+        <span class="meeting-location" title="Meeting location">@Model.Location</span>
     }
-    <span class="meeting-participants">
+    <span class="meeting-participants" title="Meeting participants">
         @{
-            var count = Model.Participants.Count;
+            var count = Model.Participants.Count - 1;
+            var list = Model.Participants.Where(u => u.Id != ViewBag.CurrentUser.Id).Skip(0).Take(2);
             var participants = "";
             if (count >= 1)
             {
-                participants += Model.Participants.First().UserName;
+                participants += list.First().UserName;
             }
             if (count >= 2)
             {
-                participants += ", " + Model.Participants.Skip(1).Take(1).First().UserName;
+                participants += ", " + list.Skip(1).First().UserName;
             }
             if (count > 2)
             {
