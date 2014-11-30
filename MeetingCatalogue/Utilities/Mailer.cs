@@ -76,7 +76,7 @@ namespace MeetingCatalogue.Utilities
             var iCal = new iCalendar();
 
             var evt = iCal.Create<DDay.iCal.Event>();
-            evt.Summary = meeting.Summary;
+            evt.Name = meeting.Title;
             evt.Organizer = new Organizer(meeting.Owner.Email);
 
             evt.Created = new iCalDateTime(meeting.CreatedOn);
