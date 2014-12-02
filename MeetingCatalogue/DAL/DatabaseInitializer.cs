@@ -5,7 +5,7 @@ using System.Web;
 
 namespace MeetingCatalogue.DAL
 {
-    public class DatabaseInitializer : System.Data.Entity.DropCreateDatabaseIfModelChanges<MeetingCatalogueContext>
+    public class DatabaseInitializer : System.Data.Entity.DropCreateDatabaseAlways<MeetingCatalogueContext>
     {
     }
 }

@@ -17,14 +17,14 @@ namespace MeetingCatalogue
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-             // namespace for the EdmxWriter class
-            using (var ctx = new MeetingCatalogue.DAL.MeetingCatalogueContext())
-            {
-                using (var writer = new System.Xml.XmlTextWriter(@"c:\Temp\Model.edmx", System.Text.Encoding.Default))
-                {
-                    System.Data.Entity.Infrastructure.EdmxWriter.WriteEdmx(ctx, writer);
-                }
-            }
+            // // namespace for the EdmxWriter class
+            //using (var ctx = new MeetingCatalogue.DAL.MeetingCatalogueContext())
+            //{
+            //    using (var writer = new System.Xml.XmlTextWriter(@"c:\Temp\Model.edmx", System.Text.Encoding.Default))
+            //    {
+            //        System.Data.Entity.Infrastructure.EdmxWriter.WriteEdmx(ctx, writer);
+            //    }
+            //}
         }
     }
 }
