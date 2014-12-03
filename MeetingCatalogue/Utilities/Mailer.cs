@@ -28,7 +28,7 @@ namespace MeetingCatalogue.Utilities
             string url = urlHelper.Action("Details", "Meetings", new { id = meeting.ID }, "https");
 
             MailMessage msg = new MailMessage();
-            msg.From = new MailAddress("meetingtracker@meetingtracker.com", "Meeting Tracker");
+            msg.From = new MailAddress(ConfigurationManager.AppSettings["GMailAddress"], "Meeting Tracker");
             foreach (var user in meeting.Participants)
             {
                 msg.To.Add(new MailAddress(user.Email, user.UserName));
@@ -47,15 +47,25 @@ namespace MeetingCatalogue.Utilities
             //AlternateView avCal = AlternateView.CreateAlternateViewFromString(calendarEvent, contype);
             //msg.AlternateViews.Add(avCal);
 
-            var credentials = new NetworkCredential(
-                ConfigurationManager.AppSettings["mailAccount"],
-                ConfigurationManager.AppSettings["mailPassword"]
-            );
+            //var credentials = new NetworkCredential(
+            //    ConfigurationManager.AppSettings["mailAccount"],
+            //    ConfigurationManager.AppSettings["mailPassword"]
+            //);
 
-            SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
-            smtpClient.Credentials = credentials;
+            //SmtpClient smtpClient = new SmtpClient("smtp.sendgrid.net", Convert.ToInt32(587));
+            //smtpClient.Credentials = credentials;
 
-            smtpClient.Send(msg);
+            //smtpClient.Send(msg);
+
+            SmtpClient smtp = new SmtpClient();
+            smtp.Host = "smtp.gmail.com";
+            smtp.Port = 587;
+            smtp.EnableSsl = true;
+            smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+            smtp.UseDefaultCredentials = false;
+            smtp.Credentials = new NetworkCredential(ConfigurationManager.AppSettings["GMailAddress"], ConfigurationManager.AppSettings["GMailPassword"]);
+
+            smtp.Send(msg);
         }
 
         private static string GetBody(Meeting meeting, ActionType action, string url)
@@ -77,9 +87,14 @@ namespace MeetingCatalogue.Utilities
             var iCal = new iCalendar();
 
             var evt = iCal.Create<DDay.iCal.Event>();
-            evt.Name = meeting.Title;
+            //evt.Name = meeting.Title;
             evt.Summary = meeting.Title;
-            evt.Organizer = new Organizer(meeting.Owner.Email);
+            evt.Organizer = new Organizer("mailto:" + meeting.Owner.Email) { CommonName = meeting.Owner.UserName };
+
+            foreach (var user in meeting.Participants)
+            {
+                evt.Attendees.Add(new Attendee("mailto:" + user.Email) { CommonName = user.UserName });
+            }
 
             evt.Created = new iCalDateTime(meeting.CreatedOn);
             evt.Start = new iCalDateTime(meeting.From.Value);
@@ -87,6 +102,7 @@ namespace MeetingCatalogue.Utilities
             evt.Location = meeting.Location;
 
             evt.LastModified = new iCalDateTime(DateTime.Now);
+            evt.Sequence = (int) (DateTime.Now.Subtract(meeting.CreatedOn).Ticks / TimeSpan.TicksPerSecond);
             evt.UID = Convert.ToBase64String(((HashAlgorithm)CryptoConfig.CreateFromName("MD5")).ComputeHash(new UTF8Encoding().GetBytes(url)));
             evt.Status = action == ActionType.Deleted ? EventStatus.Cancelled : EventStatus.Confirmed;
 

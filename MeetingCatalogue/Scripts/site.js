@@ -78,7 +78,7 @@
     }
 
     // Initialization
-    $self.attr('title', 'click to edit');
+    $self.attr('title', 'Click to edit');
     $self.append('<span class="edit-sign"><span class="glyphicon glyphicon-edit"></span></span>');
     $self.click(enableEditing);
     $('<p class="no-content"><em>No ' + options.name + ' yet.</em></p>').appendTo($self);
